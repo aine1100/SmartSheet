@@ -4,20 +4,20 @@
     <section class="pt-32 pb-24 bg-white">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <p class="text-caption text-green-600 mb-4">PRICING</p>
-          <h1 class="text-display text-4xl md:text-5xl text-gray-900 mb-6">
+          <p class="text-sm font-semibold text-green-600 mb-4 uppercase tracking-wide">PRICING</p>
+          <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Simple pricing for powerful spreadsheet automation
           </h1>
-          <p class="text-body text-xl text-gray-600 max-w-4xl mx-auto">
+          <p class="text-xl text-gray-600 max-w-4xl mx-auto">
             Choose the perfect SmartSheet plan for your team. Start with our free trial and upgrade as you grow. No
             hidden fees, transparent pricing for AI-powered spreadsheet automation.
           </p>
-          
         </div>
       </div>
     </section>
 
     <!-- Pricing Section -->
+         <!-- Pricing Section -->
     <section class="py-24 bg-white">
       <PricingSection />
     </section>
@@ -26,9 +26,9 @@
     <section class="py-24 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <p class="text-caption text-green-600 mb-4">FEATURE COMPARISON</p>
-          <h2 class="text-heading text-3xl md:text-4xl text-gray-900 mb-6">Compare SmartSheet plans</h2>
-          <p class="text-body text-xl text-gray-600 max-w-3xl mx-auto">
+          <p class="text-sm font-semibold text-green-600 mb-4 uppercase tracking-wide">FEATURE COMPARISON</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Compare SmartSheet plans</h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
             Compare all AI automation features and capabilities across our plans to find the perfect fit for your
             spreadsheet workflows.
           </p>
@@ -44,22 +44,22 @@
                   <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">
                     <div class="flex flex-col items-center">
                       <span class="text-lg font-bold">Basic</span>
-                      <span class="text-xs text-gray-500 mt-1">$9/month</span>
+                      <span class="text-xs text-gray-500 mt-1">$19/month</span>
                     </div>
                   </th>
                   <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900 bg-green-50 relative">
                     <div class="flex flex-col items-center">
-                      <div class="absolute top-1 left-1/2 transform -translate-x-1/2">
+                      <div class="absolute top-2 left-1/2 transform -translate-x-1/2">
                         <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full">Most Popular</span>
                       </div>
-                      <span class="text-lg font-bold text-green-700 mt-2">Pro</span>
-                      <span class="text-xs text-green-600 mt-1">$29/month</span>
+                      <span class="text-lg font-bold text-green-700 mt-4">Pro</span>
+                      <span class="text-xs text-green-600 mt-1">$49/month</span>
                     </div>
                   </th>
                   <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">
                     <div class="flex flex-col items-center">
                       <span class="text-lg font-bold">Enterprise</span>
-                      <span class="text-xs text-gray-500 mt-1">Custom</span>
+                      <span class="text-xs text-gray-500 mt-1">$89/month</span>
                     </div>
                   </th>
                 </tr>
@@ -82,23 +82,44 @@
                     </td>
                     <td class="px-6 py-4 text-center">
                       <div class="flex items-center justify-center">
-                        <component :is="getFeatureIcon(feature.basic)" :class="getFeatureClass(feature.basic)"
-                          v-if="typeof feature.basic === 'boolean'" />
-                        <span v-else :class="getFeatureClass(feature.basic)">{{ feature.basic }}</span>
+                        <!-- Check Icon -->
+                        <svg v-if="feature.basic === true" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <!-- X Icon -->
+                        <svg v-else-if="feature.basic === false" class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <!-- Text Value -->
+                        <span v-else class="text-gray-700 text-sm font-medium">{{ feature.basic }}</span>
                       </div>
                     </td>
                     <td class="px-6 py-4 text-center bg-green-50">
                       <div class="flex items-center justify-center">
-                        <component :is="getFeatureIcon(feature.pro)" :class="getFeatureClass(feature.pro)"
-                          v-if="typeof feature.pro === 'boolean'" />
-                        <span v-else :class="getFeatureClass(feature.pro)">{{ feature.pro }}</span>
+                        <!-- Check Icon -->
+                        <svg v-if="feature.pro === true" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <!-- X Icon -->
+                        <svg v-else-if="feature.pro === false" class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <!-- Text Value -->
+                        <span v-else class="text-gray-700 text-sm font-medium">{{ feature.pro }}</span>
                       </div>
                     </td>
                     <td class="px-6 py-4 text-center">
                       <div class="flex items-center justify-center">
-                        <component :is="getFeatureIcon(feature.enterprise)" :class="getFeatureClass(feature.enterprise)"
-                          v-if="typeof feature.enterprise === 'boolean'" />
-                        <span v-else :class="getFeatureClass(feature.enterprise)">{{ feature.enterprise }}</span>
+                        <!-- Check Icon -->
+                        <svg v-if="feature.enterprise === true" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <!-- X Icon -->
+                        <svg v-else-if="feature.enterprise === false" class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <!-- Text Value -->
+                        <span v-else class="text-gray-700 text-sm font-medium">{{ feature.enterprise }}</span>
                       </div>
                     </td>
                   </tr>
@@ -114,9 +135,9 @@
     <section class="py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <p class="text-caption text-green-600 mb-4">FAQ</p>
-          <h2 class="text-heading text-3xl md:text-4xl text-gray-900 mb-6">SmartSheet pricing questions</h2>
-          <p class="text-body text-xl text-gray-600 max-w-3xl mx-auto">
+          <p class="text-sm font-semibold text-green-600 mb-4 uppercase tracking-wide">FAQ</p>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">SmartSheet pricing questions</h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
             Common questions about SmartSheet pricing, features, and subscription plans.
           </p>
         </div>
@@ -145,8 +166,8 @@
     <!-- Enterprise CTA -->
     <section class="py-24 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-heading text-4xl text-gray-900 mb-6">Need Something Custom?</h2>
-        <p class="text-body text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+        <h2 class="text-4xl font-bold text-gray-900 mb-6">Need Something Custom?</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
           For large organizations with specific requirements, we offer custom enterprise solutions with dedicated
           support and tailored features.
         </p>
@@ -164,27 +185,14 @@
   </div>
 </template>
 
+
 <script>
 import PricingSection from '../components/PricingSection.vue'
-
 export default {
   name: 'Pricing',
-  components: {
-    PricingSection,
-    CheckIcon: {
-      template: `
-        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-      `
-    },
-    XIcon: {
-      template: `
-        <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      `
-    }
+  components:{
+    PricingSection
+
   },
   data() {
     return {
@@ -286,16 +294,6 @@ export default {
     },
     getFeaturesByCategory(category) {
       return this.comparisonFeatures.filter(feature => feature.category === category)
-    },
-    getFeatureIcon(value) {
-      if (value === true) return this.$options.components.CheckIcon
-      if (value === false) return this.$options.components.XIcon
-      return 'span'
-    },
-    getFeatureClass(value) {
-      if (value === true) return 'text-green-600'
-      if (value === false) return 'text-red-400'
-      return 'text-gray-700 text-sm font-medium'
     }
   }
 }
