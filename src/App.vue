@@ -1,8 +1,8 @@
 <template>
   <div id="app" class="min-h-screen">
-    <HeaderSection />
+    <HeaderSection v-if="showHeaderFooter" />
     <router-view />
-    <FooterSection />
+    <FooterSection v-if="showHeaderFooter" />
   </div>
 </template>
 
@@ -15,6 +15,13 @@ export default {
   components: {
     HeaderSection,
     FooterSection
+  },
+  computed: {
+    showHeaderFooter() {
+      // Hide header and footer on login and all dashboard pages
+      const currentPath = this.$route.path
+      return !currentPath.startsWith('/login') && !currentPath.startsWith('/dashboard')
+    }
   }
 }
 </script>
