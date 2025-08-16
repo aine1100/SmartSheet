@@ -1,213 +1,274 @@
 <template>
-  <div class="space-y-8">
+  <div class="space-y-6">
     <!-- Header -->
     <div class="flex justify-between items-center">
       <div>
         <h1 class="text-3xl font-bold text-gray-900">AI Analysis</h1>
         <p class="text-gray-600 mt-1">Get intelligent insights from your spreadsheet data</p>
       </div>
-      <div class="flex items-center space-x-3">
-        <CustomDropdown
-          v-model="selectedSpreadsheet"
-          :options="spreadsheetOptions"
-          placeholder="Select spreadsheet..."
-          searchable
-          class="w-64"
-        />
-        <button @click="exportResults" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-          Export Results
-        </button>
+      <button 
+        v-if="currentAnalysis" 
+        @click="exportResults" 
+        class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
+        Export Results
+      </button>
+    </div>
+
+    <!-- File Selection Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Select Data Source</h2>
+      
+      <!-- Spreadsheet Selection -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Choose from existing spreadsheets:</label>
+          <CustomDropdown
+            v-model="selectedSpreadsheet"
+            :options="spreadsheetOptions"
+            placeholder="Select a spreadsheet..."
+            @change="onSpreadsheetSelect"
+            class="w-full"
+          />
+        </div>
+        
+        <div class="text-center text-gray-500">or</div>
+        
+        <!-- File Upload -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Upload a new file:</label>
+          <div 
+            @drop="handleFileDrop"
+            @dragover.prevent
+            @dragenter="handleDragEnter"
+            @dragleave="handleDragLeave"
+            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors cursor-pointer"
+            :class="{ 'border-green-400 bg-green-50': isDragging }"></div>
+            <input 
+              ref="fileInput"
+              type="file" 
+              @change="handleFileSelect"
+              accept=".csv,.xlsx,.xls"
+              class="hidden">
+            <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p class="text-gray-600 mb-2">Drop your file here or click to browse</p>
+            <p class="text-sm text-gray-500">Supports CSV, Excel (.xlsx, .xls)</p>
+            <button 
+              @click="$refs.fileInput.click()"
+              class="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+              Choose File
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- AI Prompt Section -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-      <div class="flex items-center space-x-3 mb-6">
-        <div class="p-3 bg-gradient-to-br from-primary to-primary-dark rounded-xl">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-        </div>
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900">AI Assistant</h2>
-          <p class="text-gray-500">Ask questions about your data or request analysis</p>
-        </div>
-      </div>
-
-      <div class="relative">
-        <textarea v-model="aiPrompt" 
-                  @keydown.ctrl.enter="runAnalysis"
-                  placeholder="Ask me anything about your data... 
-
-Examples:
-• Analyze sales trends for the last quarter
-• Find patterns in customer behavior
-• Predict next month's revenue
-• Identify top performing products
-• Compare expenses across categories"
-                  class="w-full h-32 px-4 outline-none py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
-                  rows="4"></textarea>
-        <div class="absolute bottom-4 right-4 flex items-center space-x-2">
-          <span class="text-xs text-gray-400">Ctrl + Enter to send</span>
-          <button @click="runAnalysis" 
-                  :disabled="!aiPrompt.trim() || isAnalyzing"
-                  :class="[
-                    'px-4 py-2 rounded-lg font-medium transition-all',
-                    aiPrompt.trim() && !isAnalyzing 
-                      ? 'bg-primary text-white hover:bg-primary-dark' 
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  ]">
-            <span v-if="isAnalyzing" class="flex items-center space-x-2">
-              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Analyzing...</span>
-            </span>
-            <span v-else>Analyze</span>
-          </button>
-        </div>
+    <!-- Loading State -->
+    <div v-if="isAnalyzing" class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Analyzing Your Data</h3>
+        <p class="text-gray-600">Please wait while we generate insights from your spreadsheet...</p>
       </div>
     </div>
 
     <!-- Analysis Results -->
-    <div v-if="analysisResults.length > 0" class="space-y-6">
-      <!-- Chat Results -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="px-6 py-4 border-b border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-900">Analysis Results</h3>
-        </div>
-        <div class="p-6">
-          <div class="space-y-6">
-            <div v-for="result in analysisResults" :key="result.id" class="space-y-4">
-              <!-- User Query -->
-              <div class="flex justify-end">
-                <div class="max-w-3xl bg-primary text-white rounded-2xl px-4 py-3">
-                  <p class="text-sm">{{ result.query }}</p>
-                </div>
-              </div>
-              
-              <!-- AI Response -->
-              <div class="flex justify-start">
-                <div class="max-w-4xl bg-gray-50 rounded-2xl px-6 py-4">
-                  <div class="flex items-start space-x-3">
-                    <div class="p-2 bg-primary/10 rounded-lg">
-                      <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                    </div>
-                    <div class="flex-1">
-                      <p class="text-gray-900 mb-3">{{ result.response }}</p>
-                      
-                      <!-- Data Table -->
-                      <div v-if="result.table" class="bg-white rounded-lg border border-gray-200 overflow-hidden mb-4">
-                        <table class="min-w-full divide-y divide-gray-200">
-                          <thead class="bg-gray-50">
-                            <tr>
-                              <th v-for="header in result.table.headers" :key="header" 
-                                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {{ header }}
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="(row, index) in result.table.rows" :key="index">
-                              <td v-for="(cell, cellIndex) in row" :key="cellIndex" 
-                                  class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                                {{ cell }}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-
-                      <!-- Chart -->
-                      <div v-if="result.chart" class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-                        <div class="h-64 flex items-center justify-center bg-gradient-to-br from-primary/5 to-blue-50 rounded-lg">
-                          <div class="text-center">
-                            <svg class="w-16 h-16 text-primary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            <p class="text-gray-600">{{ result.chart.title }}</p>
-                            <p class="text-sm text-gray-500">Interactive chart would appear here</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Action Buttons -->
-                      <div class="flex items-center space-x-3 mt-4">
-                        <button class="text-primary hover:text-primary-dark text-sm font-medium">
-                          📊 Create Chart
-                        </button>
-                        <button class="text-primary hover:text-primary-dark text-sm font-medium">
-                          📄 Generate Report
-                        </button>
-                        <button class="text-primary hover:text-primary-dark text-sm font-medium">
-                          💾 Save Analysis
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Analysis Options -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="option in quickAnalysisOptions" :key="option.id" 
-           @click="runQuickAnalysis(option)"
-           class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-md hover:border-primary/20 transition-all duration-200 group">
-        <div class="flex items-center space-x-4 mb-4">
-          <div :class="option.iconBg" class="p-3 rounded-lg group-hover:scale-110 transition-transform">
-            <component :is="option.icon" :class="option.iconColor" class="w-6 h-6" />
-          </div>
-          <h3 class="font-semibold text-gray-900 group-hover:text-primary">{{ option.title }}</h3>
-        </div>
-        <p class="text-gray-600 text-sm mb-4">{{ option.description }}</p>
-        <div class="flex items-center text-primary text-sm font-medium">
-          <span>Run Analysis</span>
-          <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Analyses -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+    <div v-if="currentAnalysis" class="bg-white rounded-xl shadow-sm border border-gray-100">
       <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-gray-900">Recent Analyses</h3>
+        <h3 class="text-lg font-semibold text-gray-900">Analysis Results</h3>
+        <p class="text-sm text-gray-500">{{ currentAnalysis.fileName }}</p>
       </div>
-      <div class="p-6">
-        <div class="space-y-4">
-          <div v-for="analysis in recentAnalyses" :key="analysis.id" 
-               class="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-            <div class="flex items-center space-x-4">
-              <div class="p-2 bg-primary/10 rounded-lg">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
+      
+      <div class="p-6 space-y-6">
+        <!-- Summary Section -->
+        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+          <h4 class="font-semibold text-gray-900 mb-2 flex items-center">
+            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Summary
+          </h4>
+          <p class="text-gray-700">{{ currentAnalysis.summary }}</p>
+        </div>
+
+        <!-- Key Insights -->
+        <div>
+          <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Key Insights
+          </h4>
+          <div class="space-y-2">
+            <div v-for="insight in currentAnalysis.insights" :key="insight" 
+                 class="flex items-start space-x-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span class="text-gray-700">{{ insight }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trends -->
+        <div v-if="currentAnalysis.trends.length > 0">
+          <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            Trends
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div v-for="trend in currentAnalysis.trends" :key="trend.metric" 
+                 class="bg-gray-50 rounded-lg p-4 border">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium text-gray-900">{{ trend.metric }}</span>
+                <span :class="trend.change >= 0 ? 'text-green-600' : 'text-red-600'" 
+                      class="text-sm font-medium">
+                  {{ trend.change >= 0 ? '+' : '' }}{{ trend.change }}%
+                </span>
               </div>
-              <div>
-                <h4 class="font-medium text-gray-900">{{ analysis.title }}</h4>
-                <p class="text-sm text-gray-500">{{ analysis.description }}</p>
+              <p class="text-sm text-gray-600">{{ trend.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Basic Chart Visualization -->
+        <div v-if="currentAnalysis.chartData">
+          <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Data Visualization
+          </h4>
+          <div class="bg-gray-50 rounded-lg p-6 border">
+            <div class="h-64 flex items-center justify-center">
+              <div class="text-center">
+                <svg class="w-16 h-16 text-green-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p class="text-gray-600 font-medium">{{ currentAnalysis.chartData.title }}</p>
+                <p class="text-sm text-gray-500 mt-1">{{ currentAnalysis.chartData.description }}</p>
               </div>
             </div>
-            <div class="flex items-center space-x-4">
-              <span :class="getStatusClass(analysis.status)" class="px-2 py-1 text-xs font-medium rounded-full">
-                {{ analysis.status }}
-              </span>
-              <span class="text-sm text-gray-500">{{ analysis.completedAt }}</span>
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div v-if="currentAnalysis.recommendations.length > 0">
+          <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Recommendations
+          </h4>
+          <div class="space-y-3">
+            <div v-for="rec in currentAnalysis.recommendations" :key="rec" 
+                 class="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p class="text-gray-700">{{ rec }}</p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- AI Chat Section -->
+    <div v-if="currentAnalysis" class="bg-white rounded-xl shadow-sm border border-gray-100">
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+          <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          Ask AI About Your Data
+        </h3>
+        <p class="text-sm text-gray-500 mt-1">Get specific insights about your analysis</p>
+      </div>
+      
+      <div class="p-6">
+        <!-- Chat Messages -->
+        <div class="space-y-4 mb-4 max-h-64 overflow-y-auto" ref="chatContainer">
+          <div v-for="message in chatMessages" :key="message.id" 
+               :class="['flex', message.type === 'user' ? 'justify-end' : 'justify-start']">
+            <div :class="[
+              'max-w-xs lg:max-w-md px-4 py-2 rounded-lg',
+              message.type === 'user' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-gray-100 text-gray-900'
+            ]">
+              <p class="text-sm">{{ message.content }}</p>
+              <span class="text-xs opacity-75 mt-1 block">{{ message.timestamp }}</span>
+            </div>
+          </div>
+          
+          <!-- Typing indicator -->
+          <div v-if="isTyping" class="flex justify-start">
+            <div class="bg-gray-100 text-gray-900 max-w-xs lg:max-w-md px-4 py-2 rounded-lg">
+              <div class="flex space-x-1">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Chat Input -->
+        <div class="flex space-x-3">
+          <input
+            v-model="chatInput"
+            @keypress.enter="sendChatMessage"
+            type="text"
+            placeholder="Ask about your data analysis..."
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          <button
+            @click="sendChatMessage"
+            :disabled="!chatInput.trim() || isTyping"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Quick Questions -->
+        <div class="mt-4">
+          <p class="text-sm text-gray-600 mb-2">Quick questions:</p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="question in quickQuestions"
+              :key="question"
+              @click="askQuickQuestion(question)"
+              class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-green-100 hover:text-green-700 transition-colors">
+              {{ question }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Actions -->
+    <div v-if="!currentAnalysis && !isAnalyzing" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div class="text-center">
+        <svg class="w-16 h-16 text-green-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Ready to Analyze</h3>
+        <p class="text-gray-600 mb-4">Select a spreadsheet or upload a file to get started with AI-powered insights</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button 
+            @click="$refs.fileInput?.click()"
+            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            Upload File
+          </button>
+          <button 
+            v-if="spreadsheets.length > 0"
+            @click="scrollToSelection"
+            class="px-6 py-2 bg-white border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors font-medium">
+            Choose Existing
+          </button>
+        </div>
+      </div>
+    </div>
 </template>
 
 <script>
@@ -220,209 +281,293 @@ export default {
   },
   data() {
     return {
-      aiPrompt: '',
       selectedSpreadsheet: '',
+      currentAnalysis: null,
+      isDragging: false,
       isAnalyzing: false,
-      analysisResults: [],
+      chatInput: '',
+      chatMessages: [],
+      isTyping: false,
       spreadsheets: [
         { id: 1, name: 'Q4 Revenue Analysis' },
         { id: 2, name: 'Client Invoice Tracker' },
         { id: 3, name: 'Project Budget 2024' },
         { id: 4, name: 'Expense Report March' }
       ],
-      spreadsheetOptions: [
-        { value: 1, label: 'Q4 Revenue Analysis', icon: 'DocumentIcon', description: 'Revenue data for Q4 2024' },
-        { value: 2, label: 'Client Invoice Tracker', icon: 'DocumentIcon', description: 'Client billing and payments' },
-        { value: 3, label: 'Project Budget 2024', icon: 'DocumentIcon', description: 'Annual project budgets' },
-        { value: 4, label: 'Expense Report March', icon: 'DocumentIcon', description: 'Monthly expense tracking' }
-      ],
-      quickAnalysisOptions: [
-        {
-          id: 1,
-          title: 'Trend Analysis',
-          description: 'Identify patterns and trends in your time-series data',
-          icon: 'TrendIcon',
-          iconBg: 'bg-green-100',
-          iconColor: 'text-green-600'
-        },
-        {
-          id: 2,
-          title: 'Revenue Forecasting',
-          description: 'Predict future revenue based on historical data',
-          icon: 'ForecastIcon',
-          iconBg: 'bg-blue-100',
-          iconColor: 'text-blue-600'
-        },
-        {
-          id: 3,
-          title: 'Expense Analysis',
-          description: 'Analyze spending patterns and find optimization opportunities',
-          icon: 'ExpenseIcon',
-          iconBg: 'bg-red-100',
-          iconColor: 'text-red-600'
-        },
-        {
-          id: 4,
-          title: 'Client Performance',
-          description: 'Evaluate client profitability and engagement metrics',
-          icon: 'ClientIcon',
-          iconBg: 'bg-purple-100',
-          iconColor: 'text-purple-600'
-        },
-        {
-          id: 5,
-          title: 'Data Quality Check',
-          description: 'Identify missing values, duplicates, and inconsistencies',
-          icon: 'QualityIcon',
-          iconBg: 'bg-yellow-100',
-          iconColor: 'text-yellow-600'
-        },
-        {
-          id: 6,
-          title: 'Correlation Analysis',
-          description: 'Discover relationships between different variables',
-          icon: 'CorrelationIcon',
-          iconBg: 'bg-indigo-100',
-          iconColor: 'text-indigo-600'
-        }
-      ],
-      recentAnalyses: [
-        {
-          id: 1,
-          title: 'Q4 Revenue Trend Analysis',
-          description: 'Identified 15% growth pattern with seasonal peaks',
-          status: 'Completed',
-          completedAt: '2 hours ago'
-        },
-        {
-          id: 2,
-          title: 'Client Profitability Analysis',
-          description: 'Found top 3 clients generating 67% of revenue',
-          status: 'Completed',
-          completedAt: '1 day ago'
-        },
-        {
-          id: 3,
-          title: 'Expense Optimization Study',
-          description: 'Analyzing cost reduction opportunities',
-          status: 'Processing',
-          completedAt: 'In progress'
-        }
+      quickQuestions: [
+        'What are the main trends?',
+        'Any concerning patterns?',
+        'Best performing metrics?',
+        'Recommendations summary?'
       ]
     }
   },
-  mounted() {
-    // Check for query parameter
-    const urlParams = new URLSearchParams(window.location.search)
-    const query = urlParams.get('q')
-    if (query) {
-      this.aiPrompt = query
-      this.runAnalysis()
+  computed: {
+    spreadsheetOptions() {
+      return this.spreadsheets.map(sheet => ({
+        value: sheet.id,
+        label: sheet.name,
+        description: `Spreadsheet created ${this.getRelativeDate()}`
+      }))
     }
   },
   methods: {
-    async runAnalysis() {
-      if (!this.aiPrompt.trim()) return
-      
-      this.isAnalyzing = true
-      
-      // Simulate AI analysis
-      setTimeout(() => {
-        const newResult = {
-          id: Date.now(),
-          query: this.aiPrompt,
-          response: this.generateMockResponse(this.aiPrompt),
-          table: this.generateMockTable(),
-          chart: {
-            title: 'Revenue Trend Chart',
-            type: 'line'
-          }
+    onSpreadsheetSelect(option) {
+      if (option && option.value) {
+        const selectedSheet = this.spreadsheets.find(s => s.id === option.value)
+        if (selectedSheet) {
+          this.runAnalysis(selectedSheet.name)
         }
-        
-        this.analysisResults.unshift(newResult)
-        this.aiPrompt = ''
+      }
+    },
+
+    getRelativeDate() {
+      const dates = ['2 days ago', '1 week ago', '3 days ago', '5 days ago']
+      return dates[Math.floor(Math.random() * dates.length)]
+    },
+
+    scrollToSelection() {
+      // Scroll to the selection area
+      const selectionElement = document.querySelector('.bg-white.rounded-xl.shadow-sm.border.border-gray-100')
+      if (selectionElement) {
+        selectionElement.scrollIntoView({ behavior: 'smooth' })
+      }
+    },
+
+    handleFileSelect(event) {
+      const file = event.target.files[0]
+      if (file) {
+        this.processFile(file)
+      }
+    },
+
+    handleFileDrop(event) {
+      event.preventDefault()
+      this.isDragging = false
+      const file = event.dataTransfer.files[0]
+      if (file) {
+        this.processFile(file)
+      }
+    },
+
+    handleDragEnter(event) {
+      event.preventDefault()
+      this.isDragging = true
+    },
+
+    handleDragLeave(event) {
+      event.preventDefault()
+      this.isDragging = false
+    },
+
+    processFile(file) {
+      // Validate file type
+      const allowedTypes = ['.csv', '.xlsx', '.xls']
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase()
+      
+      if (!allowedTypes.includes(fileExtension)) {
+        alert('Please upload a CSV or Excel file (.csv, .xlsx, .xls)')
+        return
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB')
+        return
+      }
+
+      this.runAnalysis(file.name)
+    },
+
+    runAnalysis(fileName) {
+      this.isAnalyzing = true
+      this.chatMessages = [] // Clear previous chat
+      
+      // Simulate AI analysis processing
+      setTimeout(() => {
+        this.currentAnalysis = this.generateMockAnalysis(fileName)
         this.isAnalyzing = false
+        
+        // Add welcome message to chat
+        this.chatMessages.push({
+          id: Date.now(),
+          type: 'ai',
+          content: `Analysis complete for ${fileName}! I've identified key insights and trends. Feel free to ask me any questions about your data.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        })
       }, 2000)
     },
-    
-    runQuickAnalysis(option) {
-      this.aiPrompt = this.getQuickAnalysisPrompt(option)
-      this.runAnalysis()
-    },
-    
-    generateMockResponse(prompt) {
-      if (prompt.toLowerCase().includes('revenue') || prompt.toLowerCase().includes('sales')) {
-        return "Based on your data analysis, I've identified a strong upward trend in revenue over the past quarter. Your revenue has grown by 15% compared to the previous period, with particularly strong performance in March. The data shows consistent week-over-week growth with some seasonal variations."
-      } else if (prompt.toLowerCase().includes('expense') || prompt.toLowerCase().includes('cost')) {
-        return "Your expense analysis reveals several optimization opportunities. I've identified that 23% of your expenses are in discretionary categories where you could potentially save $1,200 per month. The largest expense categories are office supplies (32%) and software subscriptions (28%)."
-      } else {
-        return "I've analyzed your data and found several interesting patterns. The analysis shows positive trends across key metrics with opportunities for optimization. Here are the detailed findings with supporting data and visualizations."
+
+    generateMockAnalysis(fileName) {
+      const analysisTypes = {
+        'revenue': {
+          summary: 'Your revenue data shows strong growth patterns with seasonal variations. Total revenue increased by 23% compared to the previous period.',
+          insights: [
+            'Revenue peaked in March with $15,100, representing 18% month-over-month growth',
+            'Consistent upward trend observed across all quarters',
+            'Average monthly growth rate of 12.5% indicates healthy business expansion',
+            'Q4 performance exceeded projections by 8%'
+          ],
+          trends: [
+            { metric: 'Monthly Revenue', change: 15.2, description: 'Steady increase over the analysis period' },
+            { metric: 'Growth Rate', change: 12.5, description: 'Accelerating growth momentum' }
+          ],
+          recommendations: [
+            'Continue current growth strategies as they are showing positive results',
+            'Consider expanding marketing efforts during peak months (March-April)',
+            'Prepare for seasonal variations by building cash reserves during high-revenue periods'
+          ]
+        },
+        'expense': {
+          summary: 'Expense analysis reveals optimization opportunities with 23% of costs in discretionary categories. Total monthly expenses average $8,400.',
+          insights: [
+            'Software subscriptions account for 28% of total expenses',
+            'Office supplies represent 32% of monthly costs',
+            'Travel expenses decreased by 15% compared to last quarter',
+            'Potential savings of $1,200 per month identified'
+          ],
+          trends: [
+            { metric: 'Total Expenses', change: -5.3, description: 'Successful cost reduction initiatives' },
+            { metric: 'Software Costs', change: 8.2, description: 'Increased investment in productivity tools' }
+          ],
+          recommendations: [
+            'Review software subscriptions for unused or duplicate services',
+            'Negotiate bulk pricing for office supplies',
+            'Implement expense approval workflow for discretionary spending'
+          ]
+        },
+        'default': {
+          summary: 'Comprehensive data analysis completed. Your dataset shows positive trends with several optimization opportunities identified.',
+          insights: [
+            'Data quality is excellent with 98% completeness across all fields',
+            'Strong correlation found between key performance indicators',
+            'Seasonal patterns detected that can inform future planning',
+            'Growth trajectory is sustainable based on current metrics'
+          ],
+          trends: [
+            { metric: 'Overall Performance', change: 11.8, description: 'Positive trend across key metrics' },
+            { metric: 'Data Quality', change: 2.1, description: 'Improved data collection processes' }
+          ],
+          recommendations: [
+            'Maintain current data collection practices',
+            'Focus on areas showing the strongest positive trends',
+            'Monitor seasonal patterns for strategic planning'
+          ]
+        }
       }
-    },
-    
-    generateMockTable() {
+
+      // Determine analysis type based on filename
+      let analysisType = 'default'
+      if (fileName.toLowerCase().includes('revenue') || fileName.toLowerCase().includes('sales')) {
+        analysisType = 'revenue'
+      } else if (fileName.toLowerCase().includes('expense') || fileName.toLowerCase().includes('cost')) {
+        analysisType = 'expense'
+      }
+
+      const analysis = analysisTypes[analysisType]
+
       return {
-        headers: ['Month', 'Revenue', 'Growth %', 'Forecast'],
-        rows: [
-          ['January', '$12,500', '8%', '$13,500'],
-          ['February', '$13,200', '12%', '$14,200'],
-          ['March', '$15,100', '15%', '$16,100'],
-          ['April', '$16,800', '18%', '$17,800']
-        ]
+        fileName: fileName,
+        timestamp: new Date().toLocaleString(),
+        summary: analysis.summary,
+        insights: analysis.insights,
+        trends: analysis.trends,
+        recommendations: analysis.recommendations,
+        chartData: {
+          title: `${fileName} - Trend Analysis`,
+          description: 'Visual representation of key metrics and trends over time'
+        }
       }
     },
-    
-    getQuickAnalysisPrompt(option) {
-      const prompts = {
-        1: 'Analyze trends in my revenue data over the last 6 months and identify patterns',
-        2: 'Create a revenue forecast for the next 3 months based on historical data',
-        3: 'Analyze my expense patterns and identify areas for cost optimization',
-        4: 'Evaluate client performance and identify my most profitable clients',
-        5: 'Check data quality and identify any missing values or inconsistencies',
-        6: 'Find correlations between different variables in my dataset'
-      }
-      return prompts[option.id] || 'Analyze my data'
-    },
-    
+
     exportResults() {
-      // Handle export functionality
-      console.log('Exporting analysis results...')
-    },
-    
-    getStatusClass(status) {
-      switch (status) {
-        case 'Completed':
-          return 'bg-green-100 text-green-800'
-        case 'Processing':
-          return 'bg-blue-100 text-blue-800'
-        case 'Failed':
-          return 'bg-red-100 text-red-800'
-        default:
-          return 'bg-gray-100 text-gray-800'
+      if (!this.currentAnalysis) return
+      
+      // Create export data
+      const exportData = {
+        fileName: this.currentAnalysis.fileName,
+        analysisDate: this.currentAnalysis.timestamp,
+        summary: this.currentAnalysis.summary,
+        insights: this.currentAnalysis.insights,
+        trends: this.currentAnalysis.trends,
+        recommendations: this.currentAnalysis.recommendations
       }
-    }
-  },
-  components: {
-    TrendIcon: {
-      template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>`
+
+      // Convert to JSON and download
+      const dataStr = JSON.stringify(exportData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `analysis-${this.currentAnalysis.fileName}-${Date.now()}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
     },
-    ForecastIcon: {
-      template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>`
+
+    sendChatMessage() {
+      if (!this.chatInput.trim() || this.isTyping) return
+      
+      const userMessage = {
+        id: Date.now(),
+        type: 'user',
+        content: this.chatInput.trim(),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+      
+      this.chatMessages.push(userMessage)
+      const question = this.chatInput.trim()
+      this.chatInput = ''
+      
+      // Simulate AI response
+      this.isTyping = true
+      setTimeout(() => {e(question)
+        this.chatMessages.push({
+          id: Date.now() + 1,
+          type: 'ai',
+          content: aiResponse,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        })
+        this.isTyping = false
+        this.scrollChatToBottom()
+      }, 1500)
+      
+      this.scrollChatom()
     },
-    ExpenseIcon: {
-      template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>`
+
+    askQuickQuestion(question) {
+      this.chatInput = question
+      this.sendChatMessage()
     },
-    ClientIcon: {
-      template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>`
+
+    generateAIResponse(question) {
+      const responses = {
+        'trends': 'Based on your data analysis, the main trends show consistent growth with seasonal variations. Revenue has increased by 15.2% month-over-month, and there\'s a clear upward trajectory in key performance metrics.',
+        'concerning': 'I don\'t see any major red flags in your data. However, keep an eye on the slight dip in Q3 performance and monitor expense growth to ensure it stays proportional to revenue increases.',
+        'performing': 'Your best performing metrics are Monthly Revenue (15.2% growth) and Growth Rate (12.5% acceleration). These indicate strong business momentum and effective strategies.',
+        'recommendations': 'Key recommendations include: Continue current growth strategies, expand marketing during peak months, and build cash reserves for seasonal variations. Focus on maintaining data quality and monitoring trends.',
+        'default': 'That\'s a great question! Based on your current analysis, I can see strong positive trends across most metrics. Your data shows healthy growth patterns with good potential for continued expansion.'
+      }
+
+      const lowerQuestion = question.toLowerCase()
+      
+      if (lowerQuestion.includes('trend')) return responses.trends
+      if (lowerQuestion.includes('concern') || lowerQuestion.includes('problem')) return responses.concerning
+      if (lowerQuestion.includes('best') || lowerQuestion.includes('perform')) return responses.performing
+      if (lowerQuestion.includes('recommend')) return responses.recommendations
+      
+      return responses.default
     },
-    QualityIcon: {
-      template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>`
-    },
-    CorrelationIcon: {
-      template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>`
-    },
-    DocumentIcon: {
-      template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`
+
+    scrollChatToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.chatContainer
+        if (container) {
+          container.scrollTop = container.scrollHeight
+        }
+      })
     }
   }
 }

@@ -12,31 +12,29 @@
                     📁 Upload File
                 </button>
                 <button @click="createNewSpreadsheet"
-                    class="bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-dark transition-colors">
+                    class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
                     + New Spreadsheet
                 </button>
             </div>
         </div>
 
-        <!-- Filters and Search -->
+        <!-- Search -->
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                 <div class="flex items-center space-x-4">
                     <div class="relative">
                         <input v-model="searchQuery" type="text" placeholder="Search spreadsheets..."
-                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 outline-none focus:ring-primary focus:border-transparent">
+                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 outline-none focus:ring-green-500 focus:border-transparent">
                         <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
-                    <CustomDropdown v-model="selectedFilter" :options="filterOptions" placeholder="Filter files"
-                        class="w-40" />
                 </div>
                 <div class="flex items-center space-x-2">
                     <button @click="viewMode = 'grid'"
-                        :class="viewMode === 'grid' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'"
+                        :class="viewMode === 'grid' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'"
                         class="p-2 rounded-lg">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -44,7 +42,7 @@
                         </svg>
                     </button>
                     <button @click="viewMode = 'list'"
-                        :class="viewMode === 'list' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'"
+                        :class="viewMode === 'list' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'"
                         class="p-2 rounded-lg">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -61,8 +59,8 @@
                 class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="p-3 bg-primary/10 rounded-lg">
-                            <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -111,8 +109,8 @@
                         class="hover:bg-gray-50 cursor-pointer">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="p-2 bg-primary/10 rounded-lg mr-3">
-                                    <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24"
+                                <div class="p-2 bg-green-100 rounded-lg mr-3">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -134,7 +132,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ sheet.size }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button @click.stop="openSpreadsheet(sheet)"
-                                class="text-primary hover:text-primary-dark mr-3">Open</button>
+                                class="text-green-600 hover:text-green-800 mr-3">Open</button>
                             <button @click.stop="deleteSheet(sheet)"
                                 class="text-red-600 hover:text-red-900">Delete</button>
                         </td>
@@ -149,7 +147,7 @@
                 <div class="mt-3">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Import Spreadsheet</h3>
                     <div @drop="handleDrop" @dragover.prevent @dragenter.prevent
-                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-500 transition-colors">
                         <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
                             viewBox="0 0 48 48">
                             <path
@@ -177,7 +175,7 @@
                             <span class="text-sm text-gray-600">{{ file.name }}</span>
                             <div class="flex items-center space-x-2">
                                 <div class="w-16 bg-gray-200 rounded-full h-2">
-                                    <div class="bg-primary h-2 rounded-full transition-all duration-300"
+                                    <div class="bg-green-600 h-2 rounded-full transition-all duration-300"
                                         :style="{ width: file.progress + '%' }"></div>
                                 </div>
                                 <span class="text-xs text-gray-500">{{ file.progress }}%</span>
@@ -191,7 +189,7 @@
                             Cancel
                         </button>
                         <button @click="triggerFileUpload"
-                            class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark">
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
                             Browse Files
                         </button>
                     </div>
@@ -202,25 +200,16 @@
 </template>
 
 <script>
-import CustomDropdown from '../../components/CustomDropdown.vue'
+import Papa from 'papaparse'
 
 export default {
     name: 'Spreadsheets',
-    components: {
-        CustomDropdown
-    },
     data() {
         return {
             viewMode: 'grid',
             searchQuery: '',
-            selectedFilter: 'all',
             showImportModal: false,
             uploadingFiles: [],
-            filterOptions: [
-                { value: 'all', label: 'All Files', icon: 'DocumentIcon' },
-                { value: 'recent', label: 'Recent', icon: 'ClockIcon' },
-                { value: 'shared', label: 'Shared', icon: 'ShareIcon' }
-            ],
             spreadsheets: [
                 {
                     id: 1,
@@ -268,30 +257,30 @@ export default {
                 )
             }
 
-            if (this.selectedFilter !== 'all') {
-                switch (this.selectedFilter) {
-                    case 'recent':
-                        filtered = filtered.filter(sheet =>
-                            sheet.lastModified.includes('hour') || sheet.lastModified.includes('day')
-                        )
-                        break
-                    case 'shared':
-                        filtered = filtered.filter(sheet => sheet.id % 2 === 0)
-                        break
-                }
-            }
-
             return filtered
         }
     },
+    mounted() {
+        this.loadSpreadsheets()
+    },
     methods: {
+        loadSpreadsheets() {
+            // Load spreadsheets from localStorage
+            const saved = localStorage.getItem('spreadsheets')
+            if (saved) {
+                this.spreadsheets = JSON.parse(saved)
+            }
+        },
+        saveSpreadsheets() {
+            // Save spreadsheets to localStorage
+            localStorage.setItem('spreadsheets', JSON.stringify(this.spreadsheets))
+        },
         createNewSpreadsheet() {
             this.$router.push('/dashboard/spreadsheet-editor/new')
         },
         openSpreadsheet(sheet) {
             let route = `/dashboard/spreadsheet-editor/${sheet.id}`
 
-            // If we have cell data, pass it as query parameter
             if (sheet.cellData) {
                 const encodedData = encodeURIComponent(JSON.stringify(sheet.cellData))
                 route += `?data=${encodedData}&name=${encodeURIComponent(sheet.name)}`
@@ -304,6 +293,7 @@ export default {
                 const index = this.spreadsheets.findIndex(s => s.id === sheet.id)
                 if (index > -1) {
                     this.spreadsheets.splice(index, 1)
+                    this.saveSpreadsheets()
                 }
             }
         },
@@ -342,9 +332,21 @@ export default {
             })
         },
         isValidFile(file) {
-            const validTypes = ['.xlsx', '.xls', '.csv']
-            const fileExtension = '.' + file.name.split('.').pop().toLowerCase()
-            return validTypes.includes(fileExtension) && file.size <= 10 * 1024 * 1024 // 10MB
+            const validTypes = ['xlsx', 'xls', 'csv']
+            const fileExtension = file.name.split('.').pop().toLowerCase()
+            const maxSize = 10 * 1024 * 1024 // 10MB
+            
+            if (!validTypes.includes(fileExtension)) {
+                alert(`Invalid file type. Please upload Excel (.xlsx, .xls) or CSV files.`)
+                return false
+            }
+            
+            if (file.size > maxSize) {
+                alert(`File too large. Please upload files smaller than 10MB.`)
+                return false
+            }
+            
+            return true
         },
         uploadFile(file) {
             const uploadFile = {
@@ -373,10 +375,12 @@ export default {
                                 lastModified: 'Just now',
                                 status: 'Completed',
                                 size: this.formatFileSize(file.size),
-                                cellData: cellData
+                                cellData: cellData,
+                                createdAt: new Date().toISOString()
                             }
 
                             this.spreadsheets.unshift(newSpreadsheet)
+                            this.saveSpreadsheets()
 
                             // Remove from uploading files
                             const index = this.uploadingFiles.findIndex(f => f.name === file.name)
@@ -394,6 +398,8 @@ export default {
                 }, 200)
             }).catch(error => {
                 console.error('Error processing file:', error)
+                alert(`Error processing ${file.name}: ${error.message}`)
+                
                 // Remove from uploading files on error
                 const index = this.uploadingFiles.findIndex(f => f.name === file.name)
                 if (index > -1) {
@@ -402,58 +408,62 @@ export default {
             })
         },
         async processFileContent(file) {
-            if (file.name.toLowerCase().endsWith('.csv')) {
-                const text = await this.readFileAsText(file)
-                return this.parseCSV(text)
-            } else {
-                // For Excel files, return sample data for now
-                // In a real app, you'd use a library like xlsx to parse Excel files
-                return this.generateSampleData()
+            try {
+                if (file.name.toLowerCase().endsWith('.csv')) {
+                    return await this.parseCSVFile(file)
+                } else if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+                    // For Excel files, return sample data for now
+                    // TODO: Implement proper Excel parsing with xlsx library
+                    return this.generateSampleExcelData(file.name)
+                }
+            } catch (error) {
+                console.error('Error processing file:', error)
+                throw new Error(`Failed to process ${file.name}: ${error.message}`)
             }
         },
-        readFileAsText(file) {
+        parseCSVFile(file) {
             return new Promise((resolve, reject) => {
-                const reader = new FileReader()
-                reader.onload = (e) => resolve(e.target.result)
-                reader.onerror = (e) => reject(e)
-                reader.readAsText(file)
+                Papa.parse(file, {
+                    header: false,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        try {
+                            const cellData = {}
+                            results.data.forEach((row, rowIndex) => {
+                                row.forEach((cell, colIndex) => {
+                                    if (colIndex < 26) { // Limit to A-Z columns for now
+                                        const columnLetter = String.fromCharCode(65 + colIndex)
+                                        const cellId = `${columnLetter}${rowIndex + 1}`
+                                        cellData[cellId] = String(cell || '').trim()
+                                    }
+                                })
+                            })
+                            resolve(cellData)
+                        } catch (error) {
+                            reject(error)
+                        }
+                    },
+                    error: (error) => {
+                        reject(error)
+                    }
+                })
             })
         },
-        parseCSV(csvText) {
-            const lines = csvText.split('\n')
-            const result = {}
-
-            lines.forEach((line, rowIndex) => {
-                if (line.trim()) {
-                    const cells = line.split(',')
-                    cells.forEach((cell, colIndex) => {
-                        const columnLetter = String.fromCharCode(65 + colIndex)
-                        const cellId = `${columnLetter}${rowIndex + 1}`
-                        result[cellId] = cell.trim().replace(/^"|"$/g, '') // Remove quotes
-                    })
-                }
-            })
-
-            return result
-        },
-        generateSampleData() {
+        generateSampleExcelData(filename) {
+            // Generate sample data for Excel files until proper Excel parsing is implemented
             return {
-                'A1': 'Product',
-                'B1': 'Price',
-                'C1': 'Quantity',
-                'D1': 'Total',
-                'A2': 'Laptop',
-                'B2': '999',
-                'C2': '5',
-                'D2': '=B2*C2',
-                'A3': 'Mouse',
-                'B3': '25',
-                'C3': '10',
-                'D3': '=B3*C3',
-                'A4': 'Keyboard',
-                'B4': '75',
-                'C4': '8',
-                'D4': '=B4*C4'
+                'A1': 'Item',
+                'B1': 'Description',
+                'C1': 'Amount',
+                'D1': 'Date',
+                'A2': 'Sample Data',
+                'B2': `Imported from ${filename}`,
+                'C2': '100',
+                'D2': new Date().toLocaleDateString(),
+                'A3': 'Note',
+                'B3': 'Excel parsing will be implemented in future updates',
+                'C3': '',
+                'D3': ''
             }
         },
         formatFileSize(bytes) {
@@ -463,17 +473,6 @@ export default {
             const i = Math.floor(Math.log(bytes) / Math.log(k))
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
         }
-    },
-components: {
-    DocumentIcon: {
-        template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`
-    },
-    ClockIcon: {
-        template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
-    },
-    ShareIcon: {
-        template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" /></svg>`
     }
-}
 }
 </script>

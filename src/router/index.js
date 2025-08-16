@@ -56,21 +56,7 @@ const routes = [
         name: 'AIAnalysis',
         component: () => import('../views/dashboard/AIAnalysis.vue')
       },
-      {
-        path: 'charts',
-        name: 'Charts',
-        component: () => import('../views/dashboard/Charts.vue')
-      },
-      {
-        path: 'integrations',
-        name: 'Integrations',
-        component: () => import('../views/dashboard/Integrations.vue')
-      },
-      {
-        path: 'reports',
-        name: 'Reports',
-        component: () => import('../views/dashboard/Reports.vue')
-      },
+
       {
         path: 'settings',
         name: 'Settings',

@@ -19,7 +19,7 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <button @click="createNewSpreadsheet" class="group bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-primary/20 transition-all duration-200">
         <div class="flex items-center space-x-4">
           <div class="p-3 bg-primary/10 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
@@ -28,7 +28,7 @@
             </svg>
           </div>
           <div class="text-left">
-            <h3 class="font-semibold text-gray-900 group-hover:text-primary">New Spreadsheet</h3>
+            <h3 class="font-semibold text-gray-900 group-hover:text-primary">Create New</h3>
             <p class="text-sm text-gray-500">Start from scratch</p>
           </div>
         </div>
@@ -50,7 +50,7 @@
             </svg>
           </div>
           <div class="text-left">
-            <h3 class="font-semibold text-gray-900 group-hover:text-blue-500">Upload Spreadsheet</h3>
+            <h3 class="font-semibold text-gray-900 group-hover:text-blue-500">Upload</h3>
             <p class="text-sm text-gray-500">Import Excel, CSV files</p>
           </div>
         </div>
@@ -64,22 +64,8 @@
             </svg>
           </div>
           <div class="text-left">
-            <h3 class="font-semibold text-gray-900 group-hover:text-purple-500">Run AI Analysis</h3>
+            <h3 class="font-semibold text-gray-900 group-hover:text-purple-500">AI Analysis</h3>
             <p class="text-sm text-gray-500">Get instant insights</p>
-          </div>
-        </div>
-      </button>
-
-      <button @click="createChart" class="group bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-primary/20 transition-all duration-200">
-        <div class="flex items-center space-x-4">
-          <div class="p-3 bg-orange-50 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-colors">
-            <svg class="w-6 h-6 text-orange-500 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <div class="text-left">
-            <h3 class="font-semibold text-gray-900 group-hover:text-orange-500">Create Chart</h3>
-            <p class="text-sm text-gray-500">Visualize your data</p>
           </div>
         </div>
       </button>
@@ -227,7 +213,7 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900">New Spreadsheet</p>
+                  <p class="text-sm font-medium text-gray-900">Create New</p>
                   <p class="text-xs text-gray-500">Start from scratch</p>
                 </div>
               </button>
@@ -240,17 +226,6 @@
                 <div>
                   <p class="text-sm font-medium text-gray-900">AI Analysis</p>
                   <p class="text-xs text-gray-500">Get instant insights</p>
-                </div>
-              </button>
-              <button @click="createChart" class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors">
-                <div class="p-2 bg-orange-100 rounded-lg">
-                  <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900">Create Chart</p>
-                  <p class="text-xs text-gray-500">Visualize your data</p>
                 </div>
               </button>
             </div>
@@ -378,9 +353,6 @@ export default {
     },
     runAIAnalysis() {
       this.$router.push('/dashboard/ai-analysis')
-    },
-    createChart() {
-      this.$router.push('/dashboard/charts')
     },
     openFile(file) {
       this.$router.push(`/dashboard/spreadsheet-editor/${file.id}`)
